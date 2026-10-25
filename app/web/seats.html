@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Choose Your Seat</title>
+<style>
+:root{--bg:#eef2f7;--card:#ffffff;--ink:#16202e;--muted:#5b6678;--line:#d9e0ea;--accent:#1f5fae;--accent-ink:#ffffff;--soft:#e8f0fb;--good:#0a7d32;--good-bg:#e3f6e9;--bad:#b42318;--bad-bg:#fde8e7;--idle:#5b6678;--idle-bg:#eceff3}
+@media (prefers-color-scheme:dark){:root{--bg:#0e131a;--card:#171e28;--ink:#e7edf5;--muted:#9aa7b8;--line:#2a3442;--accent:#5b9cf0;--accent-ink:#0e131a;--soft:#1c2a3d;--good:#5fd38a;--good-bg:#12301f;--bad:#ff8f86;--bad-bg:#3a1714;--idle:#9aa7b8;--idle-bg:#222b38}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,sans-serif}
+header{background:var(--card);border-bottom:1px solid var(--line)}
+.top{max-width:760px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px}
+.logo{width:34px;height:34px;border-radius:9px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink);font-weight:800}
+.brand{font-weight:700}.brand small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+main{max-width:760px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:22px;margin:0 0 4px}
+.muted{color:var(--muted);margin:0 0 16px}
+.auto{display:block;text-align:center;text-decoration:none;background:var(--accent);color:var(--accent-ink);font-weight:700;padding:14px;border-radius:12px;margin-bottom:18px}
+.alert{background:var(--bad-bg);color:var(--bad);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.seat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.seat .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.seat b{font-size:17px}
+.mono{font-family:ui-monospace,Consolas,monospace;font-size:13px;color:var(--muted)}
+.st{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.st.free{background:var(--good-bg);color:var(--good)}
+.st.busy{background:var(--soft);color:var(--accent)}
+.st.offline{background:var(--idle-bg);color:var(--idle)}
+.login{font-size:14px}
+.take{margin-top:6px;text-align:center;text-decoration:none;border:1px solid var(--accent);color:var(--accent);font-weight:700;border-radius:10px;padding:9px}
+.take.off{border-color:var(--line);color:var(--muted);pointer-events:none}
+.seat.guest{border-style:dashed}
+.note{font-size:13px;color:var(--muted);margin-top:18px}
+@media (max-width:560px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="top"><div class="logo">E</div><div class="brand">Online Examination Portal<small id="title">Live class demo</small></div></div></header>
+<main>
+<h1>Choose your exam seat</h1>
+<p class="muted">Pick the seat with your name. Each seat is a computer inside the SDN-controlled exam network, and your exam traffic travels through the virtual switches from that seat.</p>
+<div id="full" class="alert" hidden>All seats are taken right now. Wait for one to become free.</div>
+
+<div class="grid" id="seats"></div>
+<p class="note">Seats show "In use" while someone is taking the exam there. Press "Finish &amp; log out" at the end to free your seat.</p>
+</main>
+<script>
+const LABEL = { free: "Free", busy: "In use", offline: "Offline" };
+const esc = (t) => { const d = document.createElement("div"); d.textContent = t == null ? "" : String(t); return d.innerHTML; };
+if (location.search.includes("full=1")) document.getElementById("full").hidden = false;
+async function load() {
+  try {
+    const d = await (await fetch("/seats/api")).json();
+    document.getElementById("title").textContent = d.title;
+    document.getElementById("seats").innerHTML = d.seats.map((s, i) => {
+      const guest = !s.student;
+      const name = guest ? "Guest seat" : "Seat " + (i + 1);
+      const login = guest ? "Not registered for the exam - the SDN will block it" : "Reserved for <b>" + esc(s.student.name) + "</b> · log in with your own password";
+      const usable = s.state === "free";
+      return "<div class='seat" + (guest ? " guest" : "") + "'><div class='row'><b>" + name + "</b><span class='st " + s.state + "'>" + LABEL[s.state] + "</span></div>" +
+        "<span class='mono'>" + esc(s.name) + " · " + esc(s.ip) + "</span><span class='login'>" + login + "</span>" +
+        "<a class='take" + (usable ? "" : " off") + "' href='/seats/pick?seat=" + encodeURIComponent(s.name) + "'>" + (usable ? "Take this seat" : "Not available") + "</a></div>";
+    }).join("");
+  } catch (e) {}
+}
+load();
+setInterval(load, 4000);
+</script>
+</body>
+</html>

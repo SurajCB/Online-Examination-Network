@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exam Portal</title>
+<style>
+:root{--bg:#eef2f7;--card:#ffffff;--ink:#16202e;--muted:#5b6678;--line:#d9e0ea;--accent:#1f5fae;--accent-ink:#ffffff;--soft:#e8f0fb;--good:#0a7d32;--good-bg:#e3f6e9;--bad:#b42318;--bad-bg:#fde8e7;--warn:#8a5a00;--warn-bg:#fff4d6;--shadow:0 10px 30px rgba(22,32,46,.08)}
+@media (prefers-color-scheme:dark){:root{--bg:#0e131a;--card:#171e28;--ink:#e7edf5;--muted:#9aa7b8;--line:#2a3442;--accent:#5b9cf0;--accent-ink:#0e131a;--soft:#1c2a3d;--good:#5fd38a;--good-bg:#12301f;--bad:#ff8f86;--bad-bg:#3a1714;--warn:#f0c060;--warn-bg:#3a2c0b;--shadow:0 10px 30px rgba(0,0,0,.35)}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,sans-serif}
+header{background:var(--card);border-bottom:1px solid var(--line)}
+.top{max-width:880px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{width:34px;height:34px;border-radius:9px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink);font-weight:800}
+.brand{font-weight:700}
+.brand small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.spacer{flex:1}
+.who{font-size:14px;color:var(--muted);text-align:right}
+.who b{color:var(--ink)}
+main{max-width:880px;margin:0 auto;padding:24px 16px 40px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:28px}
+.login{max-width:420px;margin:24px auto}
+h1{font-size:22px;margin:0 0 6px}
+.muted{color:var(--muted)}
+label{display:block;font-size:14px;font-weight:600;margin:16px 0 6px}
+input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+input:focus{outline:2px solid var(--accent);outline-offset:1px}
+button{font:inherit;border-radius:10px;padding:11px 18px;border:1px solid transparent;cursor:pointer;font-weight:600}
+button:disabled{opacity:.5;cursor:not-allowed}
+.primary{background:var(--accent);color:var(--accent-ink)}
+.ghost{background:transparent;border-color:var(--line);color:var(--ink)}
+.danger{background:transparent;border-color:var(--bad);color:var(--bad)}
+.full{width:100%;margin-top:22px}
+.alert{border-radius:10px;padding:10px 14px;margin:14px 0 0;font-size:14px}
+.alert.err{background:var(--bad-bg);color:var(--bad)}
+.alert.info{background:var(--soft);color:var(--ink)}
+.bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.pill{padding:6px 12px;border-radius:999px;background:var(--soft);font-size:14px;font-weight:600}
+.timer{font-variant-numeric:tabular-nums;font-size:22px;font-weight:800;padding:6px 14px;border-radius:12px;background:var(--soft)}
+.timer.low{background:var(--bad-bg);color:var(--bad)}
+.progress{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin:0 0 22px}
+.progress>i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .3s}
+.qno{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.qtext{font-size:20px;font-weight:600;margin:6px 0 20px}
+.opts{display:grid;gap:10px}
+.opt{display:flex;gap:12px;align-items:center;text-align:left;width:100%;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;color:var(--ink);font-weight:500}
+.opt:hover{border-color:var(--accent)}
+.opt .k{flex:none;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--soft);font-weight:700}
+.opt.sel{border-color:var(--accent);background:var(--soft)}
+.opt.sel .k{background:var(--accent);color:var(--accent-ink)}
+.actions{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap}
+.actions .grow{flex:1}
+.score{font-size:56px;font-weight:800;line-height:1;margin:10px 0}
+.score small{font-size:24px;color:var(--muted);font-weight:600}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0}
+.stat{background:var(--soft);border-radius:12px;padding:12px}
+.stat b{display:block;font-size:20px}
+.stat span{font-size:13px;color:var(--muted)}
+.review{display:grid;gap:6px;margin-top:8px}
+.rv{display:flex;justify-content:space-between;padding:10px 14px;border-radius:10px;font-size:14px}
+.rv.ok{background:var(--good-bg);color:var(--good)}
+.rv.no{background:var(--bad-bg);color:var(--bad)}
+.rv.skip{background:var(--warn-bg);color:var(--warn)}
+footer{max-width:880px;margin:0 auto;padding:0 16px 24px;color:var(--muted);font-size:13px;display:flex;gap:16px;flex-wrap:wrap}
+footer b{color:var(--ink);font-weight:600}
+.modal{position:fixed;inset:0;background:rgba(10,15,25,.55);display:none;align-items:center;justify-content:center;padding:16px}
+.modal.on{display:flex}
+.modal .card{max-width:420px;width:100%}
+.hide{display:none!important}
+@media (max-width:560px){#etitle{display:none}.card{padding:20px}.stats{grid-template-columns:1fr}.qtext{font-size:18px}}
+</style>
+</head>
+<body>
+<header><div class="top">
+<div class="logo">E</div>
+<div class="brand">Online Examination Portal<small>SDN-managed exam network</small></div>
+<div class="spacer"></div>
+<div class="who" id="who"></div>
+</div></header>
+
+<main>
+<section id="v-login" class="card login hide">
+<h1>Student login</h1>
+<p class="muted">Sign in with the username and password given by your examiner.</p>
+<form id="loginForm" autocomplete="off">
+<label for="sid">Username</label>
+<input id="sid" placeholder="e.g. Harsha" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+<label for="pin">Password</label>
+<input id="pin" type="password" placeholder="Password" required>
+<button class="primary full" id="loginBtn" type="submit">Start exam</button>
+</form>
+<div id="loginErr" class="alert err hide"></div>
+</section>
+
+<section id="v-exam" class="card hide">
+<div class="bar">
+<span class="pill" id="qcount"></span>
+<span class="muted" id="etitle"></span>
+<div class="spacer"></div>
+<span class="timer" id="timer">--:--</span>
+</div>
+<div class="progress"><i id="prog"></i></div>
+<div class="qno" id="qno"></div>
+<div class="qtext" id="qtext"></div>
+<div class="opts" id="opts"></div>
+<div id="examErr" class="alert err hide"></div>
+<div class="actions">
+<button class="ghost" id="skipBtn" type="button">Skip</button>
+<div class="grow"></div>
+<button class="danger" id="submitBtn" type="button">Submit exam</button>
+<button class="primary" id="nextBtn" type="button" disabled>Save &amp; next</button>
+</div>
+</section>
+
+<section id="v-result" class="card hide">
+<div id="timeupNote" class="alert info hide">Time is over. Your answers were submitted automatically.</div>
+<p class="muted" style="margin:16px 0 0">Your result</p>
+<div class="score" id="score"></div>
+<div class="stats">
+<div class="stat"><b id="sAnswered"></b><span>answered</span></div>
+<div class="stat"><b id="sCorrect"></b><span>correct</span></div>
+<div class="stat"><b id="sStatus"></b><span>status</span></div>
+</div>
+<p class="qno">Question review</p>
+<div class="review" id="review"></div>
+<button class="ghost full" id="doneBtn" type="button">Finish &amp; log out</button>
+</section>
+</main>
+
+<footer>
+<span>Seat <b id="fSeat">-</b></span>
+<span>Exam server <b id="fServer">-</b></span>
+<span>Server response <b id="fRtt">-</b></span>
+</footer>
+
+<div class="modal" id="confirm"><div class="card">
+<h1>Submit the exam?</h1>
+<p class="muted" id="confirmText">Unanswered questions will get zero marks. You cannot change answers after submitting.</p>
+<div class="actions"><div class="grow"></div>
+<button class="ghost" id="cancelSubmit" type="button">Keep working</button>
+<button class="primary" id="confirmSubmit" type="button">Submit</button></div>
+</div></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let state = null, selected = null, deadline = null, busy = false, pollTimer = null;
+
+async function api(path, body) {
+  const opts = body === undefined ? {} : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
+  const r = await fetch(path, opts);
+  return r.json();
+}
+
+function show(view) {
+  ["login", "exam", "result"].forEach((v) => $("v-" + v).classList.toggle("hide", v !== view));
+}
+
+function setErr(el, msg) {
+  el.textContent = msg || "";
+  el.classList.toggle("hide", !msg);
+}
+
+function render(s) {
+  state = s;
+  $("fSeat").textContent = s.seat;
+  $("fServer").textContent = s.server;
+  $("fRtt").textContent = s.last_rtt_ms != null ? s.last_rtt_ms.toFixed(1) + " ms (avg " + s.avg_rtt_ms.toFixed(1) + " ms)" : "-";
+  $("who").innerHTML = s.student ? "<b>" + esc(s.student.name || "") + "</b><br>" + esc(s.student.id) : "";
+  if (s.stage === "login") {
+    show("login");
+    setErr($("loginErr"), s.error);
+    deadline = null;
+  } else if (s.stage === "exam") {
+    show("exam");
+    setErr($("examErr"), s.error);
+    const q = s.question;
+    if (!$("qtext").dataset.qid || $("qtext").dataset.qid !== q.qid) {
+      selected = null;
+      $("qtext").dataset.qid = q.qid;
+      $("qtext").textContent = q.text;
+      $("qno").textContent = "Question " + q.index + " · " + q.marks + (q.marks === 1 ? " mark" : " marks");
+      $("qcount").textContent = q.index + " / " + q.total;
+      $("etitle").textContent = s.title || "";
+      $("prog").style.width = ((q.index - 1) / q.total * 100) + "%";
+      const box = $("opts");
+      box.innerHTML = "";
+      q.options.forEach((text, i) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "opt";
+        b.innerHTML = '<span class="k">' + (i + 1) + "</span><span></span>";
+        b.lastChild.textContent = text;
+        b.onclick = () => choose(i);
+        box.appendChild(b);
+      });
+      $("nextBtn").disabled = true;
+      $("nextBtn").textContent = q.index === q.total ? "Save & finish" : "Save & next";
+    }
+    deadline = Date.now() + s.remaining * 1000;
+    tick();
+  } else if (s.stage === "result") {
+    show("result");
+    deadline = null;
+    const r = s.result;
+    $("timeupNote").classList.toggle("hide", !s.timed_out);
+    $("score").innerHTML = r.score + " <small>/ " + r.total + "</small>";
+    $("sAnswered").textContent = r.answered + " / " + r.details.length;
+    $("sCorrect").textContent = r.details.filter((d) => d.correct).length;
+    $("sStatus").textContent = r.status === "timeout" ? "Timed out" : "Submitted";
+    const rv = $("review");
+    rv.innerHTML = "";
+    r.details.forEach((d, i) => {
+      const el = document.createElement("div");
+      const skipped = d.given === null || d.given === undefined;
+      el.className = "rv " + (skipped ? "skip" : d.correct ? "ok" : "no");
+      el.innerHTML = "<span>Q" + (i + 1) + "</span><span>" + (skipped ? "Not answered" : d.correct ? "Correct" : "Wrong") + "</span>";
+      rv.appendChild(el);
+    });
+  }
+}
+
+function esc(t) { const d = document.createElement("div"); d.textContent = t; return d.innerHTML; }
+
+function choose(i) {
+  selected = i;
+  [...$("opts").children].forEach((b, j) => b.classList.toggle("sel", j === i));
+  $("nextBtn").disabled = false;
+}
+
+function tick() {
+  if (deadline === null) { $("timer").textContent = "--:--"; return; }
+  const left = Math.max(0, Math.round((deadline - Date.now()) / 1000));
+  $("timer").textContent = String(Math.floor(left / 60)).padStart(2, "0") + ":" + String(left % 60).padStart(2, "0");
+  $("timer").classList.toggle("low", left <= 60);
+}
+
+async function act(path, body) {
+  if (busy) return;
+  busy = true;
+  document.querySelectorAll("button").forEach((b) => (b.dataset.was = b.disabled, b.disabled = true));
+  try {
+    render(await api(path, body));
+  } catch (e) {
+    setErr(state && state.stage === "exam" ? $("examErr") : $("loginErr"), "Portal not reachable: " + e.message);
+  } finally {
+    document.querySelectorAll("button").forEach((b) => (b.disabled = b.dataset.was === "true"));
+    if (state && state.stage === "exam") $("nextBtn").disabled = selected === null;
+    busy = false;
+  }
+}
+
+$("loginForm").onsubmit = (e) => { e.preventDefault(); act("/api/login", { student_id: $("sid").value, pin: $("pin").value }); };
+$("nextBtn").onclick = () => { if (selected !== null) act("/api/answer", { choice: selected }); };
+$("skipBtn").onclick = () => act("/api/answer", { choice: null });
+$("submitBtn").onclick = () => $("confirm").classList.add("on");
+$("cancelSubmit").onclick = () => $("confirm").classList.remove("on");
+$("confirmSubmit").onclick = () => { $("confirm").classList.remove("on"); act("/api/submit", {}); };
+$("doneBtn").onclick = () => { $("sid").value = window.SEAT_ID || ""; $("pin").value = ""; act("/api/logout", {}); };
+if (window.SEAT_ID) $("sid").value = window.SEAT_ID;
+document.addEventListener("keydown", (e) => {
+  if (!state || state.stage !== "exam" || e.target.tagName === "INPUT") return;
+  const n = parseInt(e.key, 10);
+  if (n >= 1 && n <= $("opts").children.length) choose(n - 1);
+  if (e.key === "Enter" && selected !== null) $("nextBtn").click();
+});
+
+setInterval(tick, 500);
+let lastSync = Date.now();
+setInterval(async () => {
+  if (busy || !state || state.stage !== "exam") return;
+  if (deadline - Date.now() > 0 && Date.now() - lastSync < 15000) return;
+  lastSync = Date.now();
+  try { render(await api("/api/state")); } catch (e) {}
+}, 1000);
+
+api("/api/state").then(render).catch(() => { show("login"); setErr($("loginErr"), "Portal not reachable."); });
+</script>
+</body>
+</html>

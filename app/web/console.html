@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exam Server Console</title>
+<style>
+:root{--bg:#eef2f7;--card:#ffffff;--ink:#16202e;--muted:#5b6678;--line:#d9e0ea;--accent:#1f5fae;--accent-ink:#ffffff;--soft:#eef3fa;--s1:#2a78d6;--s2:#eb6834;--good:#0a7d32;--good-bg:#e3f6e9;--bad:#b42318;--bad-bg:#fde8e7;--warn:#8a5a00;--warn-bg:#fff4d6;--idle:#5b6678;--idle-bg:#eceff3;--term:#0f1419;--tink:#d6dde6;--shadow:0 6px 20px rgba(22,32,46,.06)}
+@media (prefers-color-scheme:dark){:root{--bg:#0e131a;--card:#171e28;--ink:#e7edf5;--muted:#9aa7b8;--line:#2a3442;--accent:#5b9cf0;--accent-ink:#0e131a;--soft:#1c2533;--s1:#3987e5;--s2:#d95926;--good:#5fd38a;--good-bg:#12301f;--bad:#ff8f86;--bad-bg:#3a1714;--warn:#f0c060;--warn-bg:#3a2c0b;--idle:#9aa7b8;--idle-bg:#222b38;--term:#0a0e13;--shadow:0 6px 20px rgba(0,0,0,.3)}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,sans-serif}
+header{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.top{max-width:1240px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{width:34px;height:34px;border-radius:9px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink);font-weight:800;flex:none}
+.brand{font-weight:700}.brand small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.spacer{flex:1}
+nav{max-width:1240px;margin:0 auto;padding:0 16px;display:flex;gap:4px;overflow-x:auto}
+nav button{border:0;background:none;color:var(--muted);font:inherit;font-weight:600;padding:10px 12px;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+nav button.on{color:var(--ink);border-bottom-color:var(--accent)}
+nav button small{display:block;font-weight:500;font-size:11px;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-size:13px;font-weight:700}
+.pill::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.on-pill{background:var(--good-bg);color:var(--good)}.off-pill{background:var(--idle-bg);color:var(--idle)}.err-pill{background:var(--bad-bg);color:var(--bad)}
+main{max-width:1240px;margin:0 auto;padding:18px 16px 48px}
+.banner{background:var(--bad-bg);color:var(--bad);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;box-shadow:var(--shadow)}
+.tile b{display:block;font-size:26px;line-height:1.15;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.tile b.sm{font-size:17px;padding:5px 0}
+.tile span{color:var(--muted);font-size:13px}
+.grid2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}
+.grid2e{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid2>*,.grid2e>*{min-width:0}
+h2{overflow-wrap:anywhere}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);margin-bottom:16px;min-width:0}
+h2{font-size:15px;margin:0 0 12px}
+h2 small{font-weight:400;color:var(--muted);margin-left:6px}
+.rub{display:inline-block;white-space:normal;font-size:11px;font-weight:700;color:var(--accent);background:var(--soft);border-radius:6px;padding:2px 8px;margin-left:8px;vertical-align:2px}
+p{margin:0 0 10px}
+.muted{color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;padding:6px 8px;border-bottom:1px solid var(--line)}
+td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.tw{overflow-x:auto}
+.mono{font-family:ui-monospace,Consolas,monospace;font-size:13px}
+.st{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
+.st.not_joined,.st.l2,.st.idle{background:var(--idle-bg);color:var(--idle)}
+.st.in_exam,.st.exam{background:var(--soft);color:var(--accent)}
+.st.completed,.st.pass,.st.signal{background:var(--good-bg);color:var(--good)}
+.st.timeout,.st.disconnected,.st.other,.st.table-miss{background:var(--warn-bg);color:var(--warn)}
+.st.blocked,.st.fail,.st.block{background:var(--bad-bg);color:var(--bad)}
+.legend{display:flex;gap:14px;font-size:13px;color:var(--muted);margin-bottom:10px;flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.sw{margin-bottom:12px}
+.sw-head{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;gap:8px;flex-wrap:wrap}
+.cong{color:var(--bad);font-weight:700}
+.track{height:10px;background:var(--soft);border-radius:4px;margin:3px 0;position:relative}
+.track>i{position:absolute;left:0;top:0;bottom:0;border-radius:0 4px 4px 0;min-width:2px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.row:last-child{border-bottom:0}
+.row small{color:var(--muted);display:block}
+button{font:inherit;border-radius:9px;padding:7px 12px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;font-weight:600;font-size:13px}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+form.inline{display:flex;gap:8px;margin-top:12px}
+input{flex:1;min-width:0;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font:inherit}
+.term{background:var(--term);color:var(--tink);border-radius:10px;padding:12px 14px;font:12.5px/1.55 ui-monospace,Consolas,monospace;max-height:420px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+.term .g{color:#7ee787}.term .y{color:#e3b341}.term .r{color:#ff7b72}.term .b{color:#79c0ff}.term .p{color:#d2a8ff}.term .d{color:#7d8590}
+.ev{display:grid;grid-template-columns:64px 1fr 1fr;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.ev:last-child{border-bottom:0}
+.ev time{color:var(--muted);font-variant-numeric:tabular-nums}
+.ev .src{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.ev .arrow{color:var(--accent);font-weight:700}
+.ev.bad .act{color:var(--bad)}.ev.good .act{color:var(--good)}.ev.warn .act{color:var(--warn)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:ui-monospace,Consolas,monospace;font-size:12px;background:var(--soft);border-radius:999px;padding:3px 10px}
+.links{display:grid;gap:10px}
+.link{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--soft);border-radius:10px;padding:10px 12px}
+.link a{color:var(--accent);font-weight:600;overflow-wrap:anywhere}
+.link small{display:block;color:var(--muted);font-size:12px}
+.check{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line)}
+.check:last-child{border-bottom:0}
+.check div small{display:block;color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+.flowtabs{display:flex;gap:6px;margin-bottom:10px}
+.flowtabs button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+svg text{font-family:system-ui,sans-serif}
+.objectives{margin:0;padding-left:20px}
+.objectives li{margin-bottom:4px}
+.empty{color:var(--muted);font-size:14px}
+.login{max-width:380px;margin:12vh auto;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px;box-shadow:var(--shadow)}
+.login h1{font-size:21px;margin:0 0 4px}
+.login form{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.err{color:var(--bad);font-size:14px;min-height:20px}
+.hide{display:none!important}
+@media (max-width:900px){.grid2,.grid2e{grid-template-columns:1fr}.ev{grid-template-columns:56px 1fr}.ev .act{grid-column:2}}
+</style>
+</head>
+<body>
+<section id="loginView" class="login hide">
+<div class="logo">E</div>
+<h1 style="margin-top:14px">Server Console</h1>
+<p class="muted">Examiner access only. The password is printed in the terminal that runs the network.</p>
+<form id="loginForm"><input id="pw" type="password" placeholder="Console password" autocomplete="current-password"><button class="primary" type="submit">Open console</button></form>
+<div class="err" id="loginErr"></div>
+</section>
+
+<div id="app" class="hide">
+<header>
+<div class="top">
+<div class="logo">E</div>
+<div class="brand">Exam Server Console<small>Online Examination Network · TCP sockets + Mininet + Ryu SDN</small></div>
+<div class="spacer"></div>
+<span id="examPill" class="pill off-pill">Exam idle</span>
+<button id="logoutBtn" type="button">Log out</button>
+</div>
+<nav id="tabs">
+<button data-t="overview" class="on">Overview<small>Architecture · 2</small></button>
+<button data-t="server">Exam Server<small>TCP sockets · 4</small></button>
+<button data-t="network">Network<small>Mininet + SDN · 4</small></button>
+<button data-t="integration">Integration<small>Socket ↔ SDN · 3</small></button>
+<button data-t="testing">Testing<small>Tests &amp; demo · 2</small></button>
+</nav>
+</header>
+
+<main>
+<div id="banner" class="banner hide"></div>
+
+<section id="t-overview">
+<div class="tiles">
+<div class="tile"><b id="oExam" class="sm">-</b><span>exam status</span></div>
+<div class="tile"><b id="oOnline">0</b><span>students in exam</span></div>
+<div class="tile"><b id="oDone">0</b><span>submitted</span></div>
+<div class="tile"><b id="oBlocked">0</b><span>blocked hosts</span></div>
+<div class="tile"><b id="oSwitches">0</b><span>switches connected</span></div>
+</div>
+<div class="grid2">
+<div>
+<div class="card">
+<h2>Problem &amp; objectives<span class="rub">Problem Understanding &amp; Architecture · 2 marks</span></h2>
+<p>A multi-user online examination where students connect to an exam server over <b>TCP sockets</b>, running inside a <b>Mininet</b> network whose switches are programmed by a <b>Ryu SDN controller</b>. The network monitors and manages exam traffic.</p>
+<ol class="objectives">
+<li>Concurrent TCP exam delivery: login, questions, answers, timer, results.</li>
+<li>The controller knows when an exam is running, from application events.</li>
+<li>Only assigned seats reach the server; brute-force sources get blocked.</li>
+<li>Exam traffic gets a guaranteed-bandwidth queue; traffic is monitored per switch.</li>
+<li>Response time and fairness are measured and compared with a baseline.</li>
+</ol>
+</div>
+<div class="card">
+<h2>System architecture</h2>
+<div class="tw"><svg viewBox="0 0 760 330" width="100%" style="min-width:600px" role="img" aria-label="Architecture diagram">
+<defs><marker id="ah" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"/></marker></defs>
+<g font-size="13" fill="var(--ink)">
+<rect x="10" y="20" width="150" height="56" rx="10" fill="var(--soft)" stroke="var(--line)"/><text x="85" y="44" text-anchor="middle" font-weight="700">Student phones</text><text x="85" y="62" text-anchor="middle" fill="var(--muted)" font-size="11">public link (HTTPS)</text>
+<rect x="10" y="130" width="150" height="56" rx="10" fill="var(--soft)" stroke="var(--line)"/><text x="85" y="154" text-anchor="middle" font-weight="700">Gateway :7000</text><text x="85" y="172" text-anchor="middle" fill="var(--muted)" font-size="11">picks a seat</text>
+<rect x="215" y="130" width="160" height="56" rx="10" fill="var(--soft)" stroke="var(--line)"/><text x="295" y="154" text-anchor="middle" font-weight="700">Seat portals st1–st6</text><text x="295" y="172" text-anchor="middle" fill="var(--muted)" font-size="11">10.0.0.11–16 :8000</text>
+<rect x="430" y="130" width="140" height="56" rx="10" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/><text x="500" y="154" text-anchor="middle" font-weight="700">OVS switches</text><text x="500" y="172" text-anchor="middle" fill="var(--muted)" font-size="11">s1 · s2 · s3</text>
+<rect x="615" y="130" width="135" height="56" rx="10" fill="var(--soft)" stroke="var(--line)"/><text x="682" y="154" text-anchor="middle" font-weight="700">Exam server</text><text x="682" y="172" text-anchor="middle" fill="var(--muted)" font-size="11">srv 10.0.0.1 :5000</text>
+<rect x="430" y="250" width="140" height="56" rx="10" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/><text x="500" y="274" text-anchor="middle" font-weight="700">Ryu controller</text><text x="500" y="292" text-anchor="middle" fill="var(--muted)" font-size="11">OpenFlow 1.3 · REST</text>
+<rect x="615" y="250" width="135" height="56" rx="10" fill="var(--soft)" stroke="var(--line)"/><text x="682" y="274" text-anchor="middle" font-weight="700">Server Console</text><text x="682" y="292" text-anchor="middle" fill="var(--muted)" font-size="11">this website</text>
+</g>
+<g stroke="var(--muted)" stroke-width="1.6" fill="none" marker-end="url(#ah)">
+<path d="M85 76 V126"/><path d="M160 158 H211"/><path d="M375 158 H426"/><path d="M570 158 H611"/>
+<path d="M500 186 V246"/><path d="M682 186 C682 220 600 215 560 248"/><path d="M611 278 H574"/>
+</g>
+<g font-size="11" fill="var(--muted)">
+<text x="380" y="148">TCP :5000</text><text x="168" y="148">HTTP</text><text x="508" y="222">packet-in / flow-mod</text><text x="612" y="214">UDP signals</text><text x="580" y="270">REST</text>
+</g>
+</svg></div>
+<p class="muted" style="margin-top:8px;font-size:13px">Every exam message leaves a seat inside Mininet and crosses the SDN switches to reach the server. The server reports exam events to the controller, which changes flow rules in response.</p>
+</div>
+</div>
+<div>
+<div class="card">
+<h2>Public links</h2>
+<div class="links" id="links"></div>
+</div>
+<div class="card">
+<h2>Students</h2>
+<div class="tw"><table><thead><tr><th>ID</th><th>Name</th><th>Seat</th><th>Status</th><th>Score</th></tr></thead><tbody id="oStudents"></tbody></table></div>
+</div>
+<div class="card">
+<h2>Rubric map</h2>
+<table><tbody>
+<tr><td>Problem &amp; architecture</td><td class="mono">2</td><td>this page</td></tr>
+<tr><td>TCP socket implementation</td><td class="mono">4</td><td>Exam Server tab</td></tr>
+<tr><td>Mininet + SDN</td><td class="mono">4</td><td>Network tab</td></tr>
+<tr><td>Socket–SDN integration</td><td class="mono">3</td><td>Integration tab</td></tr>
+<tr><td>Initial testing &amp; demo</td><td class="mono">2</td><td>Testing tab</td></tr>
+</tbody></table>
+</div>
+</div>
+</div>
+</section>
+
+<section id="t-server" class="hide">
+<div class="tiles">
+<div class="tile"><b id="sState" class="sm">-</b><span>server</span></div>
+<div class="tile"><b id="sListen" class="sm mono">-</b><span>listening socket</span></div>
+<div class="tile"><b id="sActive">0</b><span>open TCP connections</span></div>
+<div class="tile"><b id="sTotal">0</b><span>connections accepted</span></div>
+<div class="tile"><b id="sUptime">-</b><span>uptime</span></div>
+<div class="tile"><b id="sDur">-</b><span>exam time per student</span></div>
+</div>
+<div class="grid2">
+<div>
+<div class="card">
+<h2>Live exam sessions<span class="rub">TCP/UDP Socket Implementation · 4 marks</span></h2>
+<div class="tw"><table><thead><tr><th>Student</th><th>Seat IP</th><th>Status</th><th>Question</th><th>Answered</th><th>Time left</th><th>Score</th></tr></thead><tbody id="sSessions"></tbody></table></div>
+</div>
+<div class="card">
+<h2>Server log <small>live, newest at the bottom</small></h2>
+<div class="term" id="sLog"></div>
+</div>
+</div>
+<div>
+<div class="card">
+<h2>How the server works</h2>
+<table><tbody>
+<tr><td><b>Socket</b></td><td>socket() → bind() → listen() → accept() loop on TCP port 5000</td></tr>
+<tr><td><b>Concurrency</b></td><td>One thread per student, capped by a semaphore (server full → ERROR)</td></tr>
+<tr><td><b>Framing</b></td><td>4-byte length + JSON; recv_exact() handles partial reads</td></tr>
+<tr><td><b>Timer</b></td><td>Server-side deadline used as the socket timeout → TIME_UP + auto-submit</td></tr>
+<tr><td><b>Robustness</b></td><td>Duplicate login blocked, resume after disconnect, malformed frames rejected</td></tr>
+</tbody></table>
+</div>
+<div class="card">
+<h2>Message protocol</h2>
+<table><thead><tr><th>Message</th><th>Direction</th></tr></thead><tbody>
+<tr><td class="mono">LOGIN</td><td>student → server</td></tr>
+<tr><td class="mono">LOGIN_OK / LOGIN_FAIL</td><td>server → student</td></tr>
+<tr><td class="mono">QUESTION</td><td>server → student</td></tr>
+<tr><td class="mono">ANSWER / SUBMIT</td><td>student → server</td></tr>
+<tr><td class="mono">TIME_UP</td><td>server → student</td></tr>
+<tr><td class="mono">RESULT</td><td>server → student</td></tr>
+<tr><td class="mono">PING / PONG</td><td>both ways</td></tr>
+</tbody></table>
+</div>
+<div class="card">
+<h2>Failed logins by IP</h2>
+<div id="sFails"></div>
+</div>
+</div>
+</div>
+</section>
+
+<section id="t-network" class="hide">
+<div class="card">
+<h2>Live topology<span class="rub">Mininet + SDN Implementation · 4 marks</span></h2>
+<div class="legend"><span><i style="background:var(--accent)"></i>Student in exam</span><span><i style="background:var(--bad)"></i>Blocked by SDN</span><span><i style="background:var(--good)"></i>Exam server</span><span><i style="background:var(--idle)"></i>Idle host</span></div>
+<div class="tw" id="topo"></div>
+</div>
+<div class="grid2">
+<div class="card">
+<h2>Flow tables <small>installed by the Ryu controller</small></h2>
+<div class="flowtabs" id="flowTabs"></div>
+<div class="tw"><table><thead><tr><th>Prio</th><th>Type</th><th>Match</th><th>Actions</th><th>Pkts</th><th>Bytes</th></tr></thead><tbody id="flowRows"></tbody></table></div>
+</div>
+<div>
+<div class="card">
+<h2>Traffic per switch <small>Mbps, last 5 s</small></h2>
+<div class="legend"><span><i style="background:var(--s1)"></i>Exam traffic</span><span><i style="background:var(--s2)"></i>Other traffic</span></div>
+<div id="traffic"></div>
+</div>
+<div class="card">
+<h2>QoS queues on core links</h2>
+<table><tbody id="queues"></tbody></table>
+</div>
+<div class="card">
+<h2>Flow priorities</h2>
+<table><tbody>
+<tr><td class="mono">400</td><td>Signals to the controller (10.0.0.254)</td></tr>
+<tr><td class="mono">300</td><td>Blocked host → drop</td></tr>
+<tr><td class="mono">100</td><td>Exam TCP :5000 → priority queue</td></tr>
+<tr><td class="mono">10</td><td>Other IP traffic</td></tr>
+<tr><td class="mono">5</td><td>ARP / L2</td></tr>
+<tr><td class="mono">0</td><td>Table-miss → controller</td></tr>
+</tbody></table>
+</div>
+</div>
+</div>
+</section>
+
+<section id="t-integration" class="hide">
+<div class="grid2">
+<div class="card">
+<h2>Application event → SDN reaction<span class="rub">Socket–SDN Integration · 3 marks</span></h2>
+<div id="iEvents"></div>
+</div>
+<div>
+<div class="card">
+<h2>How the two sides talk</h2>
+<p>The exam server sends small UDP messages to a virtual address <span class="mono">10.0.0.254:6666</span>. A priority-400 rule on every switch hands them to the controller, which answers the ARP for that address itself and checks a shared token and the sender IP.</p>
+<table><thead><tr><th>App event</th><th>Network reaction</th></tr></thead><tbody>
+<tr><td class="mono">exam_start</td><td>Exam mode on, seat whitelist, priority queues</td></tr>
+<tr><td>SYN from unlisted host</td><td>Drop rule on all switches</td></tr>
+<tr><td class="mono">auth_fail ×3</td><td>Source IP blocked</td></tr>
+<tr><td class="mono">student_login / submit</td><td>Tracked for monitoring</td></tr>
+<tr><td class="mono">exam_end</td><td>Exam mode off, blocks removed</td></tr>
+</tbody></table>
+</div>
+<div class="card">
+<h2>Seat whitelist</h2>
+<div class="chips" id="iAllowed"></div>
+</div>
+<div class="card">
+<h2>Blocked hosts</h2>
+<div id="iBlocked"></div>
+<form class="inline" id="blockForm"><input id="blockIp" placeholder="IP to block, e.g. 10.0.0.12"><button class="primary" type="submit">Block</button></form>
+<div class="err" id="blockMsg"></div>
+</div>
+</div>
+</div>
+</section>
+
+<section id="t-testing" class="hide">
+<div class="grid2e">
+<div class="card">
+<h2>Live system checks<span class="rub">Initial Testing &amp; Demo · 2 marks</span></h2>
+<div id="checks"></div>
+</div>
+<div class="card">
+<h2>Last automated test run <small id="runTag"></small></h2>
+<div id="lastRun"></div>
+</div>
+</div>
+<div class="card">
+<h2>Re-run the automated tests</h2>
+<p>The automated run builds its own network, so stop the live portal first (type <span class="mono">exit</span> in Mininet), then run:</p>
+<div class="term">./scripts/run_demo.sh            # T1–T9 with all students at once
+./scripts/run_demo.sh --congestion # same, with a 15 Mbps background flood</div>
+<p class="muted" style="margin-top:10px">Results appear here automatically when the run finishes.</p>
+</div>
+</section>
+</main>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (t) => { const d = document.createElement("div"); d.textContent = t == null ? "" : String(t); return d.innerHTML; };
+const LABEL = { not_joined: "Not joined", in_exam: "In exam", completed: "Submitted", timeout: "Timed out", blocked: "Blocked", disconnected: "Disconnected", active: "In exam" };
+let tab = "overview", lastOverview = null, flowSwitch = null, timer = null;
+
+async function get(path) {
+  const r = await fetch(path);
+  if (r.status === 401) { showLogin(); throw new Error("auth"); }
+  return r.json();
+}
+async function post(path, body) {
+  const r = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) });
+  if (r.status === 401) { showLogin(); throw new Error("auth"); }
+  return r.json();
+}
+
+function showLogin() { $("app").classList.add("hide"); $("loginView").classList.remove("hide"); clearInterval(timer); timer = null; }
+function showApp() { $("loginView").classList.add("hide"); $("app").classList.remove("hide"); refresh(); if (!timer) timer = setInterval(refresh, 2000); }
+
+$("loginForm").onsubmit = async (e) => {
+  e.preventDefault();
+  const r = await fetch("/api/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: $("pw").value }) });
+  const d = await r.json();
+  if (r.ok) { $("pw").value = ""; $("loginErr").textContent = ""; showApp(); } else $("loginErr").textContent = d.error || "Login failed";
+};
+$("logoutBtn").onclick = async () => { await fetch("/api/logout", { method: "POST" }); showLogin(); };
+
+document.querySelectorAll("#tabs button").forEach((b) => b.onclick = () => {
+  tab = b.dataset.t;
+  document.querySelectorAll("#tabs button").forEach((x) => x.classList.toggle("on", x === b));
+  document.querySelectorAll("main > section").forEach((s) => s.classList.toggle("hide", s.id !== "t-" + tab));
+  refresh();
+});
+
+function fmtDur(s) { if (s == null) return "-"; s = Math.max(0, Math.round(s)); const m = Math.floor(s / 60); return m >= 60 ? Math.floor(m / 60) + "h " + (m % 60) + "m" : m + ":" + String(s % 60).padStart(2, "0"); }
+
+function header(d) {
+  const banner = $("banner");
+  const msgs = [];
+  if (!d.controller_ok) msgs.push(d.controller_error);
+  if (!d.server_up) msgs.push("Exam server status not available - is run_portal.sh running?");
+  banner.classList.toggle("hide", msgs.length === 0);
+  banner.textContent = msgs.join(" · ");
+  const pill = $("examPill");
+  pill.className = "pill " + (!d.controller_ok ? "err-pill" : d.exam_active ? "on-pill" : "off-pill");
+  pill.textContent = !d.controller_ok ? "Controller offline" : d.exam_active ? "Exam running · " + d.server : "Exam idle";
+}
+
+function renderOverview(d) {
+  const c = d.students.reduce((a, s) => (a[s.state] = (a[s.state] || 0) + 1, a), {});
+  $("oExam").textContent = d.exam_active ? "Running" : "Idle";
+  $("oOnline").textContent = (c.in_exam || 0) + (c.disconnected || 0);
+  $("oDone").textContent = (c.completed || 0) + (c.timeout || 0);
+  $("oBlocked").textContent = Object.keys(d.blocked).length;
+  $("oSwitches").textContent = d.switches.length;
+  $("oStudents").innerHTML = d.students.map((s) => "<tr><td class='mono'>" + esc(s.id) + "</td><td>" + esc(s.name) + "</td><td class='mono'>" + esc(s.ip) +
+    "</td><td><span class='st " + s.state + "'>" + LABEL[s.state] + "</span>" + (s.progress && s.state === "in_exam" ? " <small class='muted'>" + esc(s.progress) + "</small>" : "") +
+    "</td><td class='mono'>" + esc(s.score || "-") + "</td></tr>").join("");
+  const L = d.links;
+  const item = (label, url, note) => "<div class='link'><div><small>" + label + "</small>" + (url ? "<a href='" + esc(url) + "' target='_blank'>" + esc(url.replace("https://", "")) + "</a>" : "<span class='muted'>" + note + "</span>") + "</div>" +
+    (url ? "<button type='button' data-copy='" + esc(url) + "'>Copy</button>" : "") + "</div>";
+  $("links").innerHTML = item("Student exam portal (share with the class)", L.student, "Not running - start ./scripts/run_public.sh") +
+    item("Server Console (examiners, password protected)", L.console, "Not running - start ./scripts/run_public.sh");
+  $("links").querySelectorAll("[data-copy]").forEach((b) => b.onclick = () => { navigator.clipboard && navigator.clipboard.writeText(b.dataset.copy); b.textContent = "Copied"; setTimeout(() => (b.textContent = "Copy"), 1500); });
+}
+
+function colorLine(line) {
+  const e = esc(line);
+  return e.replace(/^(\S+)/, "<span class='d'>$1</span>")
+    .replace(/\[(SERVER)\]/, "<span class='p'>[$1]</span>").replace(/\[(SDN)\]/, "<span class='b'>[$1]</span>")
+    .replace(/\[(RESULT)\]/, "<span class='y'>[$1]</span>").replace(/\[(AUTH)\] (failed|.*exceeded)/, "<span class='r'>[$1]</span> $2")
+    .replace(/\[(AUTH)\]/, "<span class='g'>[$1]</span>");
+}
+
+function renderServer(d) {
+  const st = d.status;
+  $("sState").innerHTML = d.up ? "<span class='st completed'>Running</span>" : "<span class='st blocked'>Stopped</span>";
+  $("sListen").textContent = st ? st.advertise : "-";
+  $("sActive").textContent = st ? st.active_clients : 0;
+  $("sTotal").textContent = st ? st.total_connections : 0;
+  $("sUptime").textContent = st ? fmtDur(st.uptime) : "-";
+  $("sDur").textContent = st ? fmtDur(st.duration) : "-";
+  const sessions = st ? st.sessions : [];
+  $("sSessions").innerHTML = sessions.length ? sessions.map((s) => "<tr><td><b>" + esc(s.id) + "</b> " + esc(s.name) + "</td><td class='mono'>" + esc(s.ip || "-") +
+    "</td><td><span class='st " + (s.status === "active" ? "in_exam" : s.status) + "'>" + (LABEL[s.status] || s.status) + "</span></td><td class='mono'>" +
+    (s.status === "active" || s.status === "disconnected" ? s.question + "/" + s.total : "-") + "</td><td class='mono'>" + s.answered + "</td><td class='mono'>" +
+    (s.remaining ? fmtDur(s.remaining) : "-") + "</td><td class='mono'>" + (s.score != null ? s.score + "/" + s.total : "-") + "</td></tr>").join("")
+    : "<tr><td colspan='7' class='empty'>No student has logged in yet.</td></tr>";
+  const term = $("sLog");
+  const atBottom = term.scrollTop + term.clientHeight >= term.scrollHeight - 20;
+  term.innerHTML = st ? st.log.map(colorLine).join("\n") : "No status file yet.";
+  if (atBottom) term.scrollTop = term.scrollHeight;
+  const fails = st ? Object.entries(st.auth_failures) : [];
+  $("sFails").innerHTML = fails.length ? fails.map(([ip, n]) => "<div class='row'><span class='mono'>" + esc(ip) + "</span><span class='st " + (n >= 3 ? "blocked" : "timeout") + "'>" + n + " failed</span></div>").join("") : "<div class='empty'>No failed logins.</div>";
+}
+
+function topoSvg(t, status) {
+  if (!t) return "<div class='empty'>Topology not available yet - start ./scripts/run_portal.sh</div>";
+  const blocked = (status && status.blocked) || {}, active = (status && status.active_students) || {};
+  const W = 1000, pos = { s1: [500, 150], s2: [250, 270], s3: [750, 270] };
+  const groups = {};
+  t.hosts.forEach((h) => (groups[h.switch] = groups[h.switch] || []).push(h));
+  const hp = {};
+  (groups.s1 || []).forEach((h, i, a) => (hp[h.name] = [500 + (i - (a.length - 1) / 2) * 190, 50]));
+  ["s2", "s3"].forEach((s) => (groups[s] || []).forEach((h, i, a) => (hp[h.name] = [pos[s][0] + (i - (a.length - 1) / 2) * 92, 390])));
+  let out = "<svg viewBox='0 0 " + W + " 440' width='100%' style='min-width:760px'>";
+  [["s1", "s2"], ["s1", "s3"]].forEach(([a, b]) => out += "<line x1='" + pos[a][0] + "' y1='" + pos[a][1] + "' x2='" + pos[b][0] + "' y2='" + pos[b][1] + "' stroke='var(--accent)' stroke-width='3'/>" +
+    "<text x='" + ((pos[a][0] + pos[b][0]) / 2 + (b === "s2" ? -14 : 14)) + "' y='" + ((pos[a][1] + pos[b][1]) / 2 - 6) + "' text-anchor='" + (b === "s2" ? "end" : "start") + "' font-size='12' fill='var(--muted)'>" + t.core_bw + " Mbps · q1 ≥ " + t.exam_min_rate + " Mbps</text>");
+  t.hosts.forEach((h) => { const p = hp[h.name], s = pos[h.switch]; if (p && s) out += "<line x1='" + p[0] + "' y1='" + p[1] + "' x2='" + s[0] + "' y2='" + s[1] + "' stroke='var(--line)' stroke-width='1.5'/>"; });
+  Object.entries(pos).forEach(([n, p]) => out += "<rect x='" + (p[0] - 34) + "' y='" + (p[1] - 18) + "' width='68' height='36' rx='8' fill='var(--card)' stroke='var(--accent)' stroke-width='2'/><text x='" + p[0] + "' y='" + (p[1] + 5) + "' text-anchor='middle' font-weight='700' font-size='14' fill='var(--ink)'>" + n + "</text>");
+  t.hosts.forEach((h) => {
+    const p = hp[h.name]; if (!p) return;
+    const ip = h.ip;
+    const color = blocked[ip] ? "var(--bad)" : h.name === "srv" ? "var(--good)" : active[ip] ? "var(--accent)" : "var(--idle)";
+    const label = h.name === "desktop" ? "desktop" : h.name;
+    out += "<g><title>" + esc(label + " " + ip + (blocked[ip] ? " - blocked: " + blocked[ip].reason : "")) + "</title><circle cx='" + p[0] + "' cy='" + p[1] + "' r='17' fill='" + color + "'/>" +
+      "<text x='" + p[0] + "' y='" + (p[1] + 4) + "' text-anchor='middle' font-size='11' font-weight='700' fill='#fff'>" + esc(label.replace("desktop", "PC")) + "</text>" +
+      "<text x='" + p[0] + "' y='" + (p[1] + (p[1] > 300 ? 33 : -24)) + "' text-anchor='middle' font-size='11' fill='var(--muted)'>" + esc(ip.split(".").pop() === "200" ? ".200 browser" : "." + ip.split(".").pop()) + "</text></g>";
+  });
+  return out + "</svg>";
+}
+
+function renderTraffic(el, traffic) {
+  const max = Math.max(1, ...traffic.map((t) => Math.max(t.exam_mbps, t.other_mbps)));
+  el.innerHTML = traffic.length ? traffic.map((t) => "<div class='sw'><div class='sw-head'><b>s" + t.dpid + "</b><span>" + (t.congested ? "<span class='cong'>Congested</span> · " : "") +
+    "exam " + t.exam_mbps.toFixed(2) + " · other " + t.other_mbps.toFixed(2) + "</span></div>" +
+    "<div class='track'><i style='width:" + (t.exam_mbps / max * 100) + "%;background:var(--s1)'></i></div><div class='track'><i style='width:" + (t.other_mbps / max * 100) + "%;background:var(--s2)'></i></div></div>").join("")
+    : "<div class='empty'>No statistics yet.</div>";
+}
+
+function renderNetwork(d) {
+  $("topo").innerHTML = topoSvg(d.topology, d.status);
+  const ids = Object.keys(d.flows).sort();
+  if (!flowSwitch || !ids.includes(flowSwitch)) flowSwitch = ids[0];
+  $("flowTabs").innerHTML = ids.map((id) => "<button type='button' class='" + (id === flowSwitch ? "on" : "") + "' data-sw='" + id + "'>s" + id + " (" + d.flows[id].length + ")</button>").join("");
+  $("flowTabs").querySelectorAll("button").forEach((b) => b.onclick = () => { flowSwitch = b.dataset.sw; renderNetwork(d); });
+  const rows = flowSwitch ? d.flows[flowSwitch] : [];
+  $("flowRows").innerHTML = rows.length ? rows.map((f) => "<tr><td class='mono'>" + f.priority + "</td><td><span class='st " + f.kind + "'>" + esc(f.kind) + "</span></td><td class='mono'>" +
+    esc(Object.entries(f.match).map(([k, v]) => k + "=" + v).join(", ") || "*") + "</td><td class='mono'>" + esc(f.actions.join(", ")) + "</td><td class='mono'>" + f.packets + "</td><td class='mono'>" + f.bytes + "</td></tr>").join("")
+    : "<tr><td colspan='6' class='empty'>No flow statistics yet.</td></tr>";
+  const flows = (d.stats && d.stats.flows) || {};
+  renderTraffic($("traffic"), Object.entries(flows).map(([k, v]) => Object.assign({ dpid: +k }, v)).sort((a, b) => a.dpid - b.dpid));
+  const t = d.topology;
+  $("queues").innerHTML = t ? "<tr><td class='mono'>q0</td><td>Best effort, up to " + t.core_bw + " Mbps</td></tr><tr><td class='mono'>q1</td><td>Exam traffic, at least " + t.exam_min_rate + " Mbps guaranteed</td></tr><tr><td>Mode</td><td>" +
+    (d.status && d.status.prioritize ? "Prioritisation ON during the exam" : "Baseline (no prioritisation)") + "</td></tr>" : "<tr><td class='empty'>Not available</td></tr>";
+}
+
+function describe(e) {
+  switch (e.event) {
+    case "exam_start": return ["", "App", "Exam server sent exam_start (" + e.server + ":" + e.port + ")", "Exam mode ON · whitelist " + (e.allowed || []).length + " seats · priority queues", "good"];
+    case "exam_end": return ["", "App", "Exam server sent exam_end", "Exam mode OFF · blocks and queues cleared", ""];
+    case "student_login": return ["", "App", e.student + " logged in from " + e.ip, "Seat tracked as active", ""];
+    case "student_submit": return ["", "App", e.student + " submitted (" + e.score + ", " + e.status + ")", "Result recorded", "good"];
+    case "auth_fail": return ["", "App", "Failed login #" + e.count + " from " + e.ip, e.count >= 3 ? "Threshold reached" : "Counting (" + e.count + "/3)", "warn"];
+    case "blocked": return ["", /whitelist/.test(e.reason) ? "Network" : /REST/.test(e.reason) ? "Examiner" : "App", /whitelist/.test(e.reason) ? "TCP SYN to :5000 from unlisted " + e.ip : /REST/.test(e.reason) ? "Examiner pressed Block" : e.reason + " from " + e.ip, "Drop rule (priority 300) on all switches for " + e.ip, "bad"];
+    case "unblocked": return ["", "Examiner", "Unblock " + e.ip, "Drop rules removed", "good"];
+    case "congestion": return ["", "Network", "Other traffic " + e.other_mbps + " Mbps on s" + e.dpid, e.action, "warn"];
+    case "switch_connected": return ["", "Network", "Switch s" + e.dpid + " connected", "Table-miss + signal rules installed", ""];
+    case "switch_disconnected": return ["", "Network", "Switch s" + e.dpid + " disconnected", "Removed from monitoring", "bad"];
+    case "controller_start": return ["", "Controller", "Ryu started", e.prioritize ? "Prioritisation enabled" : "Baseline mode", ""];
+    case "signal_rejected": return ["", "Network", "Signal from " + e.src, "Rejected: " + e.reason, "bad"];
+    default: return ["", "", e.event, "", ""];
+  }
+}
+
+function renderIntegration(d) {
+  $("iEvents").innerHTML = d.events.length ? d.events.slice().reverse().map((e) => {
+    const [, src, trig, act, cls] = describe(e);
+    return "<div class='ev " + cls + "'><time>" + esc(e.time) + "</time><div><span class='src'>" + esc(src) + "</span><br>" + esc(trig) + "</div><div class='act'><span class='arrow'>→ </span>" + esc(act) + "</div></div>";
+  }).join("") : "<div class='empty'>No events yet.</div>";
+  $("iAllowed").innerHTML = d.allowed.length ? d.allowed.map((ip) => "<span class='chip'>" + esc(ip) + "</span>").join("") : "<span class='empty'>Exam not started.</span>";
+  const ips = Object.keys(d.blocked);
+  $("iBlocked").innerHTML = ips.length ? ips.map((ip) => "<div class='row'><div><span class='mono'>" + esc(ip) + "</span><small>" + esc(d.blocked[ip].reason) + " · since " + esc(d.blocked[ip].since) + "</small></div><button type='button' data-ip='" + esc(ip) + "'>Unblock</button></div>").join("") : "<div class='empty'>No hosts blocked.</div>";
+  $("iBlocked").querySelectorAll("button").forEach((b) => b.onclick = () => act("/api/unblock", b.dataset.ip));
+}
+
+async function act(path, ip) {
+  try {
+    const d = await post(path, { ip });
+    $("blockMsg").textContent = d.error || "";
+    if (!d.error) { lastOverview = d; header(d); renderIntegration(d); }
+  } catch (e) {}
+}
+$("blockForm").onsubmit = (e) => { e.preventDefault(); const ip = $("blockIp").value.trim(); if (ip) act("/api/block", ip).then(() => ($("blockIp").value = "")); };
+
+function renderTests(d) {
+  $("checks").innerHTML = d.live.map((c) => "<div class='check'><span class='st " + (c.ok ? "pass" : "fail") + "'>" + (c.ok ? "PASS" : "FAIL") + "</span><div>" + esc(c.name) + "<small>" + esc(c.detail) + "</small></div></div>").join("");
+  const r = d.last_run;
+  $("runTag").textContent = r ? r.tag + " · " + r.time + (r.congestion ? " · with congestion" : "") : "";
+  if (!r) { $("lastRun").innerHTML = "<div class='empty'>No automated run yet. Run ./scripts/run_demo.sh once.</div>"; return; }
+  const p = r.performance || {};
+  $("lastRun").innerHTML = "<div class='tiles' style='margin-bottom:10px'><div class='tile'><b>" + r.passed + "/" + r.total + "</b><span>checks passed</span></div>" +
+    "<div class='tile'><b>" + (p.avg_rtt_ms != null ? p.avg_rtt_ms : "-") + "</b><span>avg response ms</span></div><div class='tile'><b>" + (p.max_rtt_ms != null ? p.max_rtt_ms : "-") + "</b><span>max response ms</span></div>" +
+    "<div class='tile'><b>" + (p.jain != null ? p.jain : "-") + "</b><span>Jain fairness</span></div></div>" +
+    r.checks.map((c) => "<div class='check'><span class='st " + (c.ok ? "pass" : "fail") + "'>" + (c.ok ? "PASS" : "FAIL") + "</span><div>" + esc(c.name) + "<small>" + esc(c.detail) + "</small></div></div>").join("");
+}
+
+async function refresh() {
+  try {
+    const ov = await get("/api/overview");
+    lastOverview = ov;
+    header(ov);
+    if (tab === "overview") renderOverview(ov);
+    if (tab === "integration") renderIntegration(ov);
+    if (tab === "server") renderServer(await get("/api/server"));
+    if (tab === "network") renderNetwork(await get("/api/network"));
+    if (tab === "testing") renderTests(await get("/api/tests"));
+  } catch (e) {}
+}
+
+fetch("/api/session").then((r) => (r.ok ? showApp() : showLogin())).catch(showLogin);
+</script>
+</body>
+</html>

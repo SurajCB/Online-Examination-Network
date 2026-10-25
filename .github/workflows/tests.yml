@@ -1,0 +1,30 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  application:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Application, portal and console tests
+        run: python tests/test_local.py
+
+  controller:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - name: Install Ryu
+        run: |
+          pip install "setuptools==67.6.1" wheel pbr
+          pip install --no-build-isolation ryu "eventlet==0.30.2" "dnspython<2"
+      - name: SDN controller tests
+        run: python tests/test_controller.py

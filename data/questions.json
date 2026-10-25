@@ -1,0 +1,125 @@
+{
+  "title": "General Knowledge Quiz",
+  "questions": [
+    {
+      "id": "Q1",
+      "text": "What is the capital of India?",
+      "options": [
+        "Mumbai",
+        "New Delhi",
+        "Kolkata",
+        "Chennai"
+      ],
+      "answer": 1,
+      "marks": 1
+    },
+    {
+      "id": "Q2",
+      "text": "How many days are there in a leap year?",
+      "options": [
+        "365",
+        "366",
+        "364",
+        "360"
+      ],
+      "answer": 1,
+      "marks": 1
+    },
+    {
+      "id": "Q3",
+      "text": "Which planet is known as the Red Planet?",
+      "options": [
+        "Venus",
+        "Jupiter",
+        "Mars",
+        "Saturn"
+      ],
+      "answer": 2,
+      "marks": 1
+    },
+    {
+      "id": "Q4",
+      "text": "What is 12 × 8?",
+      "options": [
+        "96",
+        "86",
+        "106",
+        "92"
+      ],
+      "answer": 0,
+      "marks": 1
+    },
+    {
+      "id": "Q5",
+      "text": "Which is the largest ocean on Earth?",
+      "options": [
+        "Atlantic Ocean",
+        "Indian Ocean",
+        "Arctic Ocean",
+        "Pacific Ocean"
+      ],
+      "answer": 3,
+      "marks": 1
+    },
+    {
+      "id": "Q6",
+      "text": "At what temperature does water boil at sea level?",
+      "options": [
+        "90 °C",
+        "100 °C",
+        "80 °C",
+        "120 °C"
+      ],
+      "answer": 1,
+      "marks": 1
+    },
+    {
+      "id": "Q7",
+      "text": "Which gas do plants take in from the air to make food?",
+      "options": [
+        "Oxygen",
+        "Nitrogen",
+        "Carbon dioxide",
+        "Hydrogen"
+      ],
+      "answer": 2,
+      "marks": 1
+    },
+    {
+      "id": "Q8",
+      "text": "How many sides does a hexagon have?",
+      "options": [
+        "5",
+        "6",
+        "7",
+        "8"
+      ],
+      "answer": 1,
+      "marks": 1
+    },
+    {
+      "id": "Q9",
+      "text": "Which is the smallest prime number?",
+      "options": [
+        "0",
+        "1",
+        "2",
+        "3"
+      ],
+      "answer": 2,
+      "marks": 1
+    },
+    {
+      "id": "Q10",
+      "text": "What does CPU stand for?",
+      "options": [
+        "Central Processing Unit",
+        "Computer Personal Unit",
+        "Central Program Utility",
+        "Control Processing Unit"
+      ],
+      "answer": 0,
+      "marks": 1
+    }
+  ]
+}
